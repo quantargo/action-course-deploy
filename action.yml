@@ -49,6 +49,7 @@ runs:
     - uses: r-lib/actions/setup-pandoc@v1
     
     - name: Install SO Files
+      shell: bash
       run: |
         export R_HOME=$(Rscript -e "cat(Sys.getenv('R_HOME'))")
         echo $R_HOME
@@ -58,11 +59,13 @@ runs:
         sudo apt-get install libopenblas-dev
 
     - name: Install Python deployment packages
+      shell: bash
       run: |
         DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip
         sudo pip3 install pyyaml boto3 python-frontmatter awscli lxml pytz python-dateutil
 
     - name: Update renv repos
+      shell: bash
       run: |
         python3 ${{ github.action_path }}/script_update_renv_repos.py
 
@@ -100,6 +103,7 @@ runs:
         STAGE: prod
         QKEY: ${{ inputs.QKEY_PROD }}
       if: endsWith(github.ref, '/master')
+      shell: bash
       run: |
         make deploy SLUG=${{ inputs.course-id }}
         
@@ -109,11 +113,13 @@ runs:
         QKEY: ${{ inputs.QKEY_DEV }}
         QBITURL: https://api.quantargo.com/v2-dev
       if: endsWith(github.ref, '/next')
+      shell: bash
       run: |
         make deploy SLUG=${{ inputs.course-id }}
 
     - name: Invalidate Cloudfront Development
       if: endsWith(github.ref, '/next')
+      shell: bash
       run: |
         aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CLIENT --paths "/courses/$REPONAME/*"
         aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CDN --paths "/assets/courses/$REPONAME/*"
@@ -124,6 +130,7 @@ runs:
 
     - name: Invalidate Cloudfront Production
       if: endsWith(github.ref, '/master')
+      shell: bash
       run: |
         aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CLIENT --paths "/courses/$REPONAME/*"
         aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CDN --paths "/assets/courses/$REPONAME/*"
