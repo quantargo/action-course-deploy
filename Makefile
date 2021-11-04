@@ -1,5 +1,4 @@
 R := R --slave -e
-SLUG := $(shell basename $(CURDIR))
 RMD_FILES := $(shell find 0* -type f -maxdepth 1 -name '*.Rmd')
 OUT_JSON := $(RMD_FILES:.Rmd=.json)
 OUT_PNG := $(RMD_FILES:.Rmd=.png)

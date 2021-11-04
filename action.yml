@@ -88,7 +88,7 @@ runs:
         QKEY: ${{ secrets.QKEY_PROD }}
       if: endsWith(github.ref, '/master')
       run: |
-        make deploy
+        make deploy SLUG=${{ inputs.course-id }}
         
     - name: Development Deployment Content
       env:
@@ -97,7 +97,7 @@ runs:
         QBITURL: https://api.quantargo.com/v2-dev
       if: endsWith(github.ref, '/next')
       run: |
-        make deploy
+        make deploy SLUG=${{ inputs.course-id }}
 
     - name: Invalidate Cloudfront Development
       if: endsWith(github.ref, '/next')
@@ -107,7 +107,7 @@ runs:
       env:
         CLOUDFRONT_CLIENT: ${{ secrets.CLOUDFRONT_CLIENT_DEV }}
         CLOUDFRONT_CDN: ${{ secrets.CLOUDFRONT_DEV }}
-        REPONAME: ${{ github.event.repository.name }}
+        REPONAME: ${{ inputs.course-id }}
 
     - name: Invalidate Cloudfront Production
       if: endsWith(github.ref, '/master')
@@ -117,4 +117,4 @@ runs:
       env:
         CLOUDFRONT_CLIENT: ${{ secrets.CLOUDFRONT_CLIENT_PROD }}
         CLOUDFRONT_CDN: ${{ secrets.CLOUDFRONT_PROD }}
-        REPONAME: ${{ github.event.repository.name }}
+        REPONAME: ${{ inputs.course-id }}
