@@ -49,15 +49,6 @@ runs:
         DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip
         sudo pip3 install pyyaml boto3 python-frontmatter awscli lxml pytz python-dateutil
 
-    - name: Checkout coursedeploy repo
-      uses: actions/checkout@v2
-      with:
-        repository: quantargo/coursedeploy
-        token: ${{ secrets.GIT_PAT }}
-        path: coursedeploy
-        ref: 'master'
-    - run: mv coursedeploy/* . && rm -rf coursedeploy
-
     - name: Update renv repos
       run: |
         python3 script_update_renv_repos.py
