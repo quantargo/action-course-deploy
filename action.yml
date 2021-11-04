@@ -6,7 +6,7 @@ inputs:
     description: 'The API key of your Quantargo user'
     required: true
   course-id:
-    description: 'The ID of the course you want to deploy. If you don\'t have an ID yet, create a new course first, on https://quantargo.com/dashboard/courses'
+    description: 'The ID of the course you want to deploy. If you do not have an ID yet, create a new course first on https://quantargo.com/dashboard/courses'
     required: true
 
 # outputs:
