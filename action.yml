@@ -8,6 +8,24 @@ inputs:
   course-id:
     description: 'The ID of the course you want to deploy. If you do not have an ID yet, create a new course first on https://quantargo.com/dashboard/courses'
     required: true
+  AWS_ACCESS_KEY_ID:
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    required: true
+  GIT_PAT:
+    required: true
+  QKEY_PROD:
+    required: true
+  QKEY_DEV:
+    required: true
+  CLOUDFRONT_CLIENT_DEV:
+    required: true
+  CLOUDFRONT_DEV:
+    required: true
+  CLOUDFRONT_CLIENT_PROD:
+    required: true
+  CLOUDFRONT_PROD:
+    required: true
 
 # outputs:
 #   course-url:
@@ -20,10 +38,10 @@ runs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-central-1
-        
+
     - uses: r-lib/actions/setup-r@v1
       with:
         r-version: '4.0.5'
@@ -57,7 +75,7 @@ runs:
 
     - name: Install R packages next
       env:
-        GITHUB_PAT: ${{ secrets.GIT_PAT }}
+        GITHUB_PAT: ${{ inputs.GIT_PAT }}
       if: endsWith(github.ref, '/next')
       run: |
         renv::restore()
@@ -68,7 +86,7 @@ runs:
 
     - name: Install R packages master
       env:
-        GITHUB_PAT: ${{ secrets.GIT_PAT }}
+        GITHUB_PAT: ${{ inputs.GIT_PAT }}
       if: endsWith(github.ref, '/master')
       run: |
         renv::restore()
@@ -80,7 +98,7 @@ runs:
     - name: Production Deployment Content
       env:
         STAGE: prod
-        QKEY: ${{ secrets.QKEY_PROD }}
+        QKEY: ${{ inputs.QKEY_PROD }}
       if: endsWith(github.ref, '/master')
       run: |
         make deploy SLUG=${{ inputs.course-id }}
@@ -88,7 +106,7 @@ runs:
     - name: Development Deployment Content
       env:
         STAGE: dev
-        QKEY: ${{ secrets.QKEY_DEV }}
+        QKEY: ${{ inputs.QKEY_DEV }}
         QBITURL: https://api.quantargo.com/v2-dev
       if: endsWith(github.ref, '/next')
       run: |
@@ -100,8 +118,8 @@ runs:
         aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CLIENT --paths "/courses/$REPONAME/*"
         aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CDN --paths "/assets/courses/$REPONAME/*"
       env:
-        CLOUDFRONT_CLIENT: ${{ secrets.CLOUDFRONT_CLIENT_DEV }}
-        CLOUDFRONT_CDN: ${{ secrets.CLOUDFRONT_DEV }}
+        CLOUDFRONT_CLIENT: ${{ inputs.CLOUDFRONT_CLIENT_DEV }}
+        CLOUDFRONT_CDN: ${{ inputs.CLOUDFRONT_DEV }}
         REPONAME: ${{ inputs.course-id }}
 
     - name: Invalidate Cloudfront Production
@@ -110,6 +128,6 @@ runs:
         aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CLIENT --paths "/courses/$REPONAME/*"
         aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CDN --paths "/assets/courses/$REPONAME/*"
       env:
-        CLOUDFRONT_CLIENT: ${{ secrets.CLOUDFRONT_CLIENT_PROD }}
-        CLOUDFRONT_CDN: ${{ secrets.CLOUDFRONT_PROD }}
+        CLOUDFRONT_CLIENT: ${{ inputs.CLOUDFRONT_CLIENT_PROD }}
+        CLOUDFRONT_CDN: ${{ inputs.CLOUDFRONT_PROD }}
         REPONAME: ${{ inputs.course-id }}
