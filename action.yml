@@ -51,7 +51,7 @@ runs:
 
     - name: Update renv repos
       run: |
-        python3 script_update_renv_repos.py
+        python3 ${{ github.action_path }}/script_update_renv_repos.py
 
     - uses: actions/cache@v2
       with:
