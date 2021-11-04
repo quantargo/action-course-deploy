@@ -21,6 +21,7 @@ runs:
       uses: actions/checkout@v2
       with:
         lfs: true
+        token: ${{ secrets.GIT_PAT }}
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
