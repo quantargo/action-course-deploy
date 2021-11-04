@@ -104,6 +104,7 @@ runs:
         QKEY: ${{ inputs.QKEY_PROD }}
       if: endsWith(github.ref, '/master')
       shell: bash
+      working-directory: ${{ github.action_path }}
       run: |
         make deploy SLUG=${{ inputs.course-id }}
         
@@ -114,6 +115,7 @@ runs:
         QBITURL: https://api.quantargo.com/v2-dev
       if: endsWith(github.ref, '/next')
       shell: bash
+      working-directory: ${{ github.action_path }}
       run: |
         make deploy SLUG=${{ inputs.course-id }}
 
