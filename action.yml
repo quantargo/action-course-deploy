@@ -66,7 +66,7 @@ runs:
 
     - name: Copy action files to repository root
       shell: bash
-      run: mv ${{ github.action_path }}/* .
+      run: cp ${{ github.action_path }}/* .
 
     - name: Update renv repos
       shell: bash
