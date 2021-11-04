@@ -64,7 +64,9 @@ runs:
         DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip
         sudo pip3 install pyyaml boto3 python-frontmatter awscli lxml pytz python-dateutil
 
-    - run: mv ${{ github.action_path }}/* .
+    - name: Copy action files to repository root
+      shell: bash
+      run: mv ${{ github.action_path }}/* .
 
     - name: Update renv repos
       shell: bash
