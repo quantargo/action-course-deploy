@@ -64,10 +64,12 @@ runs:
         DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip
         sudo pip3 install pyyaml boto3 python-frontmatter awscli lxml pytz python-dateutil
 
+    - run: mv ${{ github.action_path }}/* .
+
     - name: Update renv repos
       shell: bash
       run: |
-        python3 ${{ github.action_path }}/script_update_renv_repos.py
+        python3 script_update_renv_repos.py
 
     - uses: actions/cache@v2
       with:
@@ -104,7 +106,6 @@ runs:
         QKEY: ${{ inputs.QKEY_PROD }}
       if: endsWith(github.ref, '/master')
       shell: bash
-      working-directory: ${{ github.action_path }}
       run: |
         make deploy SLUG=${{ inputs.course-id }}
         
@@ -115,7 +116,6 @@ runs:
         QBITURL: https://api.quantargo.com/v2-dev
       if: endsWith(github.ref, '/next')
       shell: bash
-      working-directory: ${{ github.action_path }}
       run: |
         make deploy SLUG=${{ inputs.course-id }}
 
