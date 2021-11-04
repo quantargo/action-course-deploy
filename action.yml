@@ -1,0 +1,129 @@
+name: Course deployment
+description: Deploy courses to quantargo.com
+
+inputs:
+  api-key:
+    description: 'The API key of your Quantargo user'
+    required: true
+  course-id:
+    description: 'The ID of the course you want to deploy. If you don\'t have an ID yet, create a new course first, on https://quantargo.com/dashboard/courses'
+    required: true
+
+# outputs:
+#   course-url:
+#     description: "The URL of your course"
+#     value: ${{ steps.random-number-generator.outputs.random-id }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repo
+      uses: actions/checkout@v1
+      with:
+        lfs: true
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-central-1
+        
+    - uses: r-lib/actions/setup-r@v1
+      with:
+        r-version: '4.0.5'
+
+    - uses: r-lib/actions/setup-pandoc@v1
+    
+    - name: Install SO Files
+      run: |
+        export R_HOME=$(Rscript -e "cat(Sys.getenv('R_HOME'))")
+        echo $R_HOME
+        aws s3 sync s3://quantargo-repo-public/r/bin/linux/ubuntu-20.04/contrib/4.0.5/SOFiles/ sofiles
+        sudo mv sofiles/* $R_HOME/lib
+        rm -rf sofiles
+        sudo apt-get install libopenblas-dev
+
+    - name: Install Python deployment packages
+      run: |
+        DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip
+        sudo pip3 install pyyaml boto3 python-frontmatter awscli lxml pytz python-dateutil
+
+    - name: Checkout coursedeploy repo
+      uses: actions/checkout@v2
+      with:
+        repository: quantargo/coursedeploy
+        token: ${{ secrets.GIT_PAT }}
+        path: coursedeploy
+        ref: 'master'
+    - run: mv coursedeploy/* . && rm -rf coursedeploy
+
+    - name: Update renv repos
+      run: |
+        python3 script_update_renv_repos.py
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/.local/share/renv
+        key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-renv-
+
+    - name: Install R packages next
+      env:
+        GITHUB_PAT: ${{ secrets.GIT_PAT }}
+      if: endsWith(github.ref, '/next')
+      run: |
+        renv::restore()
+        install.packages("remotes")
+        remotes::install_github(paste(c("quantargo/qbit", "quantargo/qlearn"), "next", sep="@"), upgrade="never")
+        webshot::install_phantomjs()
+      shell: Rscript {0}
+
+    - name: Install R packages master
+      env:
+        GITHUB_PAT: ${{ secrets.GIT_PAT }}
+      if: endsWith(github.ref, '/master')
+      run: |
+        renv::restore()
+        install.packages("remotes")
+        remotes::install_github(paste(c("quantargo/qlearn"), "master", sep="@"), upgrade="never")
+        webshot::install_phantomjs()
+      shell: Rscript {0}
+
+    - name: Production Deployment Content
+      env:
+        STAGE: prod
+        QKEY: ${{ secrets.QKEY_PROD }}
+      if: endsWith(github.ref, '/master')
+      run: |
+        make deploy
+        
+    - name: Development Deployment Content
+      env:
+        STAGE: dev
+        QKEY: ${{ secrets.QKEY_DEV }}
+        QBITURL: https://api.quantargo.com/v2-dev
+      if: endsWith(github.ref, '/next')
+      run: |
+        make deploy
+
+    - name: Invalidate Cloudfront Development
+      if: endsWith(github.ref, '/next')
+      run: |
+        aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CLIENT --paths "/courses/$REPONAME/*"
+        aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CDN --paths "/assets/courses/$REPONAME/*"
+      env:
+        CLOUDFRONT_CLIENT: ${{ secrets.CLOUDFRONT_CLIENT_DEV }}
+        CLOUDFRONT_CDN: ${{ secrets.CLOUDFRONT_DEV }}
+        REPONAME: ${{ github.event.repository.name }}
+
+    - name: Invalidate Cloudfront Production
+      if: endsWith(github.ref, '/master')
+      run: |
+        aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CLIENT --paths "/courses/$REPONAME/*"
+        aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CDN --paths "/assets/courses/$REPONAME/*"
+      env:
+        CLOUDFRONT_CLIENT: ${{ secrets.CLOUDFRONT_CLIENT_PROD }}
+        CLOUDFRONT_CDN: ${{ secrets.CLOUDFRONT_PROD }}
+        REPONAME: ${{ github.event.repository.name }}
