@@ -8,11 +8,8 @@ inputs:
   course-id:
     description: 'The ID of the course you want to deploy. If you do not have an ID yet, create a new course first on https://quantargo.com/dashboard/courses'
     required: true
-  QKEY_PROD:
-    required: true
-  QKEY_DEV:
-    required: true
  
+# QBITURL env
 
 # outputs:
 #   course-url:
@@ -45,7 +42,7 @@ runs:
     - name: Install Python deployment packages
       shell: bash
       run: |
-        DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip
+        DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip libcurl4-openssl-dev
         sudo pip3 install pyyaml boto3 python-frontmatter awscli lxml pytz python-dateutil
 
     - name: Copy action files to repository root
