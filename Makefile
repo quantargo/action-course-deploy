@@ -31,23 +31,13 @@ clean:
 	rm $(OUT_PNG) $(OUT_PNG_COURSE)
 
 deploy-qbit:
-	$(R) 'library(qbit); deploy(sprintf("qbit-%s", "$(SLUG)"), meta = list(type="course"))'
+	$(R) 'library(qbit); deploy(sprintf("qbit-%s", "$(SLUG)"))'
 
 deploy: $(OUT_JSON) $(OUT_ASSETS) index deploy-qbit
-	python3 script_upload_dynamodb.py $(OUT_JSON)
-	for cdir in $(CHAPTER_DIRS) ; do \
-    aws s3 sync $$cdir $(S3_BUCKET_ASSETS)/courses/$(SLUG)/$$cdir --delete --exclude "*.html" --exclude "*.Rmd" --exclude "*.json" --exclude ".DS_Store"; \
-	done
-	aws s3 sync main $(S3_BUCKET_ASSETS)/courses/$(SLUG)/main --delete --exclude "*.html" --exclude "*.Rmd" --exclude "*.json" --exclude ".DS_Store"
-	mkdir -p $(OUT_QBIT)
-	aws s3 sync $(OUT_QBIT) $(S3_BUCKET_ASSETS)/qbits/$(OUT_QBIT) --delete --exclude ".DS_Store"
+	$(R) 'library(qbit); deploy_course("$(SLUG)")'
 
 deploy-no-qbit: $(OUT_JSON) $(OUT_ASSETS) index
-	python3 script_upload_dynamodb.py $(OUT_JSON)
-	for cdir in $(CHAPTER_DIRS) ; do \
-    aws s3 sync $$cdir $(S3_BUCKET_ASSETS)/courses/$(SLUG)/$$cdir --delete --exclude "*.html" --exclude "*.Rmd" --exclude "*.json" --exclude ".DS_Store"; \
-	done
-	aws s3 sync main $(S3_BUCKET_ASSETS)/courses/$(SLUG)/main --delete --exclude "*.html" --exclude "*.Rmd" --exclude "*.json" --exclude ".DS_Store"
+	$(R) 'library(qbit); deploy_course(("$(SLUG)")'
 
 index: $(OUT_JSON)
 	python3 script_create_index.py

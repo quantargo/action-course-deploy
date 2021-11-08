@@ -8,24 +8,11 @@ inputs:
   course-id:
     description: 'The ID of the course you want to deploy. If you do not have an ID yet, create a new course first on https://quantargo.com/dashboard/courses'
     required: true
-  AWS_ACCESS_KEY_ID:
-    required: true
-  AWS_SECRET_ACCESS_KEY:
-    required: true
-  GIT_PAT:
-    required: true
   QKEY_PROD:
     required: true
   QKEY_DEV:
     required: true
-  CLOUDFRONT_CLIENT_DEV:
-    required: true
-  CLOUDFRONT_DEV:
-    required: true
-  CLOUDFRONT_CLIENT_PROD:
-    required: true
-  CLOUDFRONT_PROD:
-    required: true
+ 
 
 # outputs:
 #   course-url:
@@ -35,18 +22,15 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-central-1
-
     - uses: r-lib/actions/setup-r@v1
       with:
         r-version: '4.0.5'
 
     - uses: r-lib/actions/setup-pandoc@v1
+
+    - uses: r-lib/actions/setup-renv@v1
+      with:
+        cache-version: 2
     
     - name: Install SO Files
       shell: bash
@@ -68,23 +52,12 @@ runs:
       shell: bash
       run: cp ${{ github.action_path }}/* .
 
-    - name: Update renv repos
-      shell: bash
-      run: |
-        python3 script_update_renv_repos.py
-
-    - uses: actions/cache@v2
-      with:
-        path: ~/.local/share/renv
-        key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-renv-
-
     - name: Install R packages next
       env:
         GITHUB_PAT: ${{ inputs.GIT_PAT }}
       if: endsWith(github.ref, '/next')
       run: |
+        options("repos" = list(QUANTARGO="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5"))
         renv::restore()
         install.packages("remotes")
         remotes::install_github(paste(c("quantargo/qbit", "quantargo/qlearn"), "next", sep="@"), upgrade="never")
@@ -96,6 +69,7 @@ runs:
         GITHUB_PAT: ${{ inputs.GIT_PAT }}
       if: endsWith(github.ref, '/master')
       run: |
+        options("repos" = list(QUANTARGO="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5"))
         renv::restore()
         install.packages("remotes")
         remotes::install_github(paste(c("quantargo/qlearn"), "master", sep="@"), upgrade="never")
@@ -105,40 +79,18 @@ runs:
     - name: Production Deployment Content
       env:
         STAGE: prod
-        QKEY: ${{ inputs.QKEY_PROD }}
+        QKEY: ${{ inputs.api-key }}
       if: endsWith(github.ref, '/master')
       shell: bash
       run: |
         make deploy SLUG=${{ inputs.course-id }}
-        
+
     - name: Development Deployment Content
       env:
         STAGE: dev
-        QKEY: ${{ inputs.QKEY_DEV }}
-        QBITURL: https://api.quantargo.com/v2-dev
+        QKEY: ${{ inputs.api-key }}
       if: endsWith(github.ref, '/next')
       shell: bash
       run: |
         make deploy SLUG=${{ inputs.course-id }}
 
-    - name: Invalidate Cloudfront Development
-      if: endsWith(github.ref, '/next')
-      shell: bash
-      run: |
-        aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CLIENT --paths "/courses/$REPONAME/*"
-        aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CDN --paths "/assets/courses/$REPONAME/*"
-      env:
-        CLOUDFRONT_CLIENT: ${{ inputs.CLOUDFRONT_CLIENT_DEV }}
-        CLOUDFRONT_CDN: ${{ inputs.CLOUDFRONT_DEV }}
-        REPONAME: ${{ inputs.course-id }}
-
-    - name: Invalidate Cloudfront Production
-      if: endsWith(github.ref, '/master')
-      shell: bash
-      run: |
-        aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CLIENT --paths "/courses/$REPONAME/*"
-        aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_CDN --paths "/assets/courses/$REPONAME/*"
-      env:
-        CLOUDFRONT_CLIENT: ${{ inputs.CLOUDFRONT_CLIENT_PROD }}
-        CLOUDFRONT_CDN: ${{ inputs.CLOUDFRONT_PROD }}
-        REPONAME: ${{ inputs.course-id }}
