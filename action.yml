@@ -37,12 +37,12 @@ runs:
         aws s3 sync s3://quantargo-repo-public/r/bin/linux/ubuntu-20.04/contrib/4.0.5/SOFiles/ sofiles
         sudo mv sofiles/* $R_HOME/lib
         rm -rf sofiles
-        sudo apt-get install libopenblas-dev
+        sudo apt-get install libopenblas-dev libcurl4-openssl-dev
 
     - name: Install Python deployment packages
       shell: bash
       run: |
-        DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip libcurl4-openssl-dev
+        DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip
         sudo pip3 install pyyaml boto3 python-frontmatter awscli lxml pytz python-dateutil
 
     - name: Copy action files to repository root
