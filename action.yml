@@ -53,8 +53,6 @@ runs:
       run: cp ${{ github.action_path }}/* .
 
     - name: Install R packages next
-      env:
-        GITHUB_PAT: ${{ inputs.GIT_PAT }}
       if: endsWith(github.ref, '/next')
       run: |
         options("repos" = list(QUANTARGO="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5"))
@@ -65,8 +63,6 @@ runs:
       shell: Rscript {0}
 
     - name: Install R packages master
-      env:
-        GITHUB_PAT: ${{ inputs.GIT_PAT }}
       if: endsWith(github.ref, '/master')
       run: |
         options("repos" = list(QUANTARGO="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5"))
