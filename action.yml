@@ -47,7 +47,7 @@ runs:
       shell: bash
       run: |
         DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq python3-pip
-        sudo pip3 install pyyaml boto3 python-frontmatter awscli lxml pytz python-dateutil
+        sudo pip3 install pyyaml python-frontmatter lxml pytz python-dateutil
 
     - name: Copy action files to repository root
       shell: bash
