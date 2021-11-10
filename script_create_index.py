@@ -5,7 +5,6 @@
 
 import yaml
 from yaml import SafeLoader, SafeDumper
-import boto3
 import os
 import json
 import sys
