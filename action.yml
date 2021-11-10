@@ -22,7 +22,7 @@ runs:
     - name: Install packages
       shell: bash
       run: |
-        sudo apt-get install libcurl4-openssl-dev libmagick++-dev
+        sudo apt-get install libopenblas-dev libcurl4-openssl-dev libmagick++-dev
     - uses: r-lib/actions/setup-r@v1
       with:
         r-version: '4.0.5'
@@ -41,7 +41,6 @@ runs:
         aws s3 sync s3://quantargo-repo-public/r/bin/linux/ubuntu-20.04/contrib/4.0.5/SOFiles/ sofiles
         sudo mv sofiles/* $R_HOME/lib
         rm -rf sofiles
-        sudo apt-get install libopenblas-dev
 
     - name: Install Python deployment packages
       shell: bash
