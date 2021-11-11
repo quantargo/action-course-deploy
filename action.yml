@@ -67,17 +67,19 @@ runs:
     - name: Production Deployment Content
       env:
         STAGE: prod
-        QKEY: ${{ inputs.QKEY_PROD }}
+        QKEY: ${{ inputs.api-key }}
       if: endsWith(github.ref, '/master')
       shell: bash
       run: |
-        make deploy
+        make deploy SLUG=${{ inputs.course-id }}
 
     - name: Development Deployment Content
       env:
         STAGE: dev
-        QKEY: ${{ inputs.QKEY_DEV }}
+        QKEY: ${{ inputs.api-key }}
+        QBITURL: https://api.quantargo.com/v2-dev
       if: endsWith(github.ref, '/next')
       shell: bash
       run: |
-        make deploy
+        make deploy SLUG=${{ inputs.course-id }}
+
