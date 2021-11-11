@@ -8,9 +8,6 @@ inputs:
   course-id:
     description: 'The ID of the course you want to deploy. If you do not have an ID yet, create a new course first on https://quantargo.com/dashboard/courses'
     required: true
-  pat:
-    description: 'Personal Access Token giving public repo read access'
-    required: true
  
 # QBITURL env
 
@@ -55,27 +52,11 @@ runs:
       shell: bash
       run: cp ${{ github.action_path }}/* .
 
-    - name: Install R packages next
-      env:
-        GITHUB_PAT: ${{ inputs.pat }}
-      if: endsWith(github.ref, '/next')
+    - name: Install R packages
       run: |
-        options("repos" = list(QUANTARGO="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5"))
+        options("repos" = list(CRAN="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5", QUANTARGO="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5-quantargo"))
         renv::restore()
-        install.packages("remotes")
-        remotes::install_github(paste(c("quantargo/qbit", "quantargo/qlearn"), "next", sep="@"), upgrade="never")
-        webshot::install_phantomjs()
-      shell: Rscript {0}
-
-    - name: Install R packages master
-      env:
-        GITHUB_PAT: ${{ inputs.pat }}
-      if: endsWith(github.ref, '/master')
-      run: |
-        options("repos" = list(QUANTARGO="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5"))
-        renv::restore()
-        install.packages("remotes")
-        remotes::install_github(paste(c("quantargo/qlearn"), "master", sep="@"), upgrade="never")
+        install.packages(c("qlearn", "qbit"))
         webshot::install_phantomjs()
       shell: Rscript {0}
 
