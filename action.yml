@@ -73,6 +73,7 @@ runs:
       env:
         STAGE: dev
         QKEY: ${{ inputs.api-key }}
+        QBITURL: https://api.quantargo.com/v2-dev
       if: endsWith(github.ref, '/next')
       shell: bash
       run: |
