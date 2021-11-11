@@ -16,6 +16,10 @@ inputs:
 #     description: "The URL of your course"
 #     value: ${{ steps.random-number-generator.outputs.random-id }}
 
+env:
+  global:
+    - RENV_CONFIG_REPOS_OVERRIDE=https://repository.quantargo.com/ubuntu-20.04/r-4.0.5-quantargo
+
 runs:
   using: "composite"
   steps:
