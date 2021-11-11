@@ -59,7 +59,7 @@ runs:
     - name: Install R packages
       run: |
         options(repos = c(QUANTARGO = "https://repository.quantargo.com/ubuntu-20.04/r-4.0.5-quantargo", 
-                          CRAN = "https://repository.quantargo.com/ubuntu-20.04/r-4.0.5-quantargo"))
+                          CRAN = "https://repository.quantargo.com/ubuntu-20.04/r-4.0.5"))
         install.packages(c("qlearn", "qbit"))
         webshot::install_phantomjs()
       shell: Rscript {0}
