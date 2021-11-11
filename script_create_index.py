@@ -48,6 +48,10 @@ def get_path_names(pattern, sort = True):
 
 with open('index.yml', 'r') as f:
   module = yaml.load(f)
+
+module['moduleId'] = sys.argv[1]
+module['contentId'] = sys.argv[1]
+
 if 'image' in module:
   module['image'] = '/'.join(['/assets/courses', module['moduleId'], module['image']])
 

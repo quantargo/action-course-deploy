@@ -40,7 +40,7 @@ deploy-no-qbit: $(OUT_JSON) $(OUT_ASSETS) index
 	$(R) 'library(qbit); deploy_course(("$(SLUG)")'
 
 index: $(OUT_JSON)
-	python3 script_create_index.py
+	python3 script_create_index.py $(SLUG)
 
 %.json : %.Rmd
 	$(R) 'library(qlearn); rmarkdown::render("$<", output_format = "qlearn::qlearn")'
