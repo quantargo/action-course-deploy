@@ -8,6 +8,9 @@ inputs:
   course-id:
     description: 'The ID of the course you want to deploy. If you do not have an ID yet, create a new course first on https://quantargo.com/dashboard/courses'
     required: true
+  pat:
+    description: 'Personal Access Token giving public repo read access'
+    required: true
  
 # QBITURL env
 
@@ -53,6 +56,8 @@ runs:
       run: cp ${{ github.action_path }}/* .
 
     - name: Install R packages next
+      env:
+        GITHUB_PAT: ${{ inputs.pat }}
       if: endsWith(github.ref, '/next')
       run: |
         options("repos" = list(QUANTARGO="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5"))
@@ -63,6 +68,8 @@ runs:
       shell: Rscript {0}
 
     - name: Install R packages master
+      env:
+        GITHUB_PAT: ${{ inputs.pat }}
       if: endsWith(github.ref, '/master')
       run: |
         options("repos" = list(QUANTARGO="https://repository.quantargo.com/ubuntu-20.04/r-4.0.5"))
