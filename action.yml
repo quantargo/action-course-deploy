@@ -54,7 +54,6 @@ runs:
 
     - name: Install R packages
       run: |
-        options("repos" = list(CRAN="", QUANTARGO=))
         renv::restore(repos = "https://repository.quantargo.com/ubuntu-20.04/r-4.0.5")
         install.packages(c("qlearn", "qbit"), repos = "https://repository.quantargo.com/ubuntu-20.04/r-4.0.5-quantargo")
         webshot::install_phantomjs()
