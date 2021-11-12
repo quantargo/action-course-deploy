@@ -23,7 +23,7 @@ runs:
 
     - uses: r-lib/actions/setup-pandoc@v1
 
-    - uses: r-lib/actions/setup-renv@v1
+    - uses: quantargo/actions/setup-renv@v1
       with:
         cache-version: 2
     
