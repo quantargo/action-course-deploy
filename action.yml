@@ -5,16 +5,6 @@ inputs:
   api-key:
     description: 'The API key of your Quantargo user'
     required: true
-  course-id:
-    description: 'The ID of the course you want to deploy. If you do not have an ID yet, create a new course first on https://quantargo.com/dashboard/courses'
-    required: true
- 
-# QBITURL env
-
-# outputs:
-#   course-url:
-#     description: "The URL of your course"
-#     value: ${{ steps.random-number-generator.outputs.random-id }}
 
 env:
   global:
@@ -71,7 +61,8 @@ runs:
       if: endsWith(github.ref, '/master')
       shell: bash
       run: |
-        make deploy SLUG=${{ inputs.course-id }}
+        export SLUG=$(grep 'moduleId:' index.yml | tr ': ' '\n' | tail -n1)
+        make deploy $SLUG
 
     - name: Development Deployment Content
       env:
@@ -81,5 +72,6 @@ runs:
       if: endsWith(github.ref, '/next')
       shell: bash
       run: |
-        make deploy SLUG=${{ inputs.course-id }}
+        export SLUG=$(grep 'moduleId:' index.yml | tr ': ' '\n' | tail -n1)
+        make deploy $SLUG
 
