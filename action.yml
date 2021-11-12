@@ -61,8 +61,7 @@ runs:
       if: endsWith(github.ref, '/master')
       shell: bash
       run: |
-        export SLUG=$(grep 'moduleId:' index.yml | tr ': ' '\n' | tail -n1)
-        make deploy $SLUG
+        make deploy SLUG=$(grep 'moduleId:' index.yml | tr ': ' '\n' | tail -n1)
 
     - name: Development Deployment Content
       env:
@@ -72,6 +71,5 @@ runs:
       if: endsWith(github.ref, '/next')
       shell: bash
       run: |
-        export SLUG=$(grep 'moduleId:' index.yml | tr ': ' '\n' | tail -n1)
-        make deploy $SLUG
+        make deploy SLUG=$(grep 'moduleId:' index.yml | tr ': ' '\n' | tail -n1)
 
