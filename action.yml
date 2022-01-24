@@ -6,10 +6,6 @@ inputs:
     description: 'The API key of your Quantargo user'
     required: true
 
-env:
-  global:
-    - RENV_CONFIG_REPOS_OVERRIDE=https://packagemanager.rstudio.com/cran/__linux__/focal/latest
-
 runs:
   using: "composite"
   steps:
