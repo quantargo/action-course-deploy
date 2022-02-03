@@ -31,7 +31,7 @@ clean:
 	rm $(OUT_PNG) $(OUT_PNG_COURSE)
 
 deploy-qbit:
-	$(R) 'library(qbit); deploy(sprintf("qbit-%s", "$(SLUG)"))'
+	$(R) 'library(qbit); if (yaml::read_yaml("index.yml")[["technologies"]] != "Theory") deploy(sprintf("qbit-%s", "$(SLUG)"))'
 
 deploy: $(OUT_JSON) $(OUT_ASSETS) index deploy-qbit
 	$(R) 'library(qbit); deploy_course("$(SLUG)")'
