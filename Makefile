@@ -31,13 +31,13 @@ clean:
 	rm $(OUT_PNG) $(OUT_PNG_COURSE)
 
 deploy-qbit:
-	$(R) 'library(qbit); if (yaml::read_yaml("index.yml")[["technologies"]] != "Theory") deploy(sprintf("qbit-%s", "$(SLUG)"))'
+	$(R) 'library(qbit); if (yaml::read_yaml("index.yml")[["technologies"]] != "Theory") deploy("qbit-$(SLUG)", files = list.files("qbit-$(SLUG)", full.names = TRUE))'
 
 deploy: $(OUT_JSON) $(OUT_ASSETS) index deploy-qbit
 	$(R) 'library(qbit); deploy_course("$(SLUG)")'
 
 deploy-no-qbit: $(OUT_JSON) $(OUT_ASSETS) index
-	$(R) 'library(qbit); deploy_course(("$(SLUG)")'
+	$(R) 'library(qbit); deploy_course("$(SLUG)")'
 
 index: $(OUT_JSON)
 	python3 script_create_index.py $(SLUG)
